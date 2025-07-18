@@ -86,11 +86,9 @@ const ChatProvider: React.FC<{
     setSelectedNode(selectedNode);
   };
 
-  // Remove server-side prompt modification logic
   const handlePrompt = async (
     promptType: keyof typeof PROMPT_TYPES | "Custom"
   ) => {
-    // No-op for now, or you can implement client-side prompt modification if desired
     setDropdown(false);
   };
 

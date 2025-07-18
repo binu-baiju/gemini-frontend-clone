@@ -8,14 +8,22 @@ import Link from "next/link";
 import { MdImageSearch } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { useAuthStore } from "@/utils/auth-store";
-import { useChatStore } from "@/utils/chat-store";
+import { getUserChatStore, getCurrentUserPhone } from "@/utils/chat-store";
 
 const InputPrompt = () => {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const userPhone = useAuthStore((s) => s.phone);
   const router = useRouter();
   const { chat } = useParams();
-  const { addMessage, addChatroom, chatrooms } = useChatStore();
+  const phone = getCurrentUserPhone();
+  const userChatStore = phone ? getUserChatStore(phone) : null;
+  const addMessage = userChatStore
+    ? userChatStore((s) => s.addMessage)
+    : () => {};
+  const addChatroom = userChatStore
+    ? userChatStore((s) => s.addChatroom)
+    : () => {};
+  const chatrooms = userChatStore ? userChatStore((s) => s.chatrooms) : [];
   const [inputImg, setInputImg] = useState<File | null>(null);
   const [inputImgName, setInputImgName] = useState<string | null>(null);
   const [userPrompt, setUserPrompt] = useState("");
@@ -28,68 +36,99 @@ const InputPrompt = () => {
   const cancelRef = useRef(false);
 
   const handleSend = useCallback(() => {
-    if (!isLoggedIn) {
+    if (!isLoggedIn || !phone) {
       router.push("/auth");
       return;
     }
     if (!userPrompt.trim()) return;
 
-    // If on /app (no chat param), create a new chatroom, add the message, and redirect
-    if (!chat) {
-      const newChatID = nanoid();
-      const title = userPrompt.split(" ").slice(0, 5).join(" ");
-      addChatroom(title, newChatID);
+    const send = (imgDataUrl?: string) => {
+      // If on /app (no chat param), create a new chatroom, add the message, and redirect
+      if (!chat) {
+        const newChatID = nanoid();
+        const title = userPrompt.split(" ").slice(0, 5).join(" ");
+        addChatroom(title, newChatID);
+        addMessage({
+          id: nanoid(),
+          chatID: newChatID,
+          sender: "user",
+          text: userPrompt,
+          timestamp: Date.now(),
+          image: imgDataUrl,
+        });
+        setUserPrompt("");
+        setInputImg(null);
+        setInputImgName(null);
+        setMsgLoader(true);
+        setOptimisticPrompt(userPrompt);
+        setTimeout(() => {
+          if (cancelRef.current) return;
+          addMessage({
+            id: nanoid(),
+            chatID: newChatID,
+            sender: "ai",
+            text: "This is a simulated Gemini reply!",
+            timestamp: Date.now(),
+            image: imgDataUrl, // For demo, echo image back
+          });
+          setOptimisticResponse(null);
+          setMsgLoader(false);
+        }, 1500);
+        router.push(`/app/${newChatID}`);
+        return;
+      }
+
+      // If already in a chatroom, just add the message to the current chatroom
+      const currentChatID = chat as string;
       addMessage({
         id: nanoid(),
-        chatID: newChatID,
+        chatID: currentChatID,
         sender: "user",
         text: userPrompt,
         timestamp: Date.now(),
+        image: imgDataUrl,
       });
       setUserPrompt("");
+      setInputImg(null);
+      setInputImgName(null);
       setMsgLoader(true);
       setOptimisticPrompt(userPrompt);
       setTimeout(() => {
         if (cancelRef.current) return;
         addMessage({
           id: nanoid(),
-          chatID: newChatID,
+          chatID: currentChatID,
           sender: "ai",
           text: "This is a simulated Gemini reply!",
           timestamp: Date.now(),
+          image: imgDataUrl, // For demo, echo image back
         });
         setOptimisticResponse(null);
         setMsgLoader(false);
       }, 1500);
-      router.push(`/app/${newChatID}`);
-      return;
-    }
+    };
 
-    // If already in a chatroom, just add the message to the current chatroom
-    const currentChatID = chat as string;
-    addMessage({
-      id: nanoid(),
-      chatID: currentChatID,
-      sender: "user",
-      text: userPrompt,
-      timestamp: Date.now(),
-    });
-    setUserPrompt("");
-    setMsgLoader(true);
-    setOptimisticPrompt(userPrompt);
-    setTimeout(() => {
-      if (cancelRef.current) return;
-      addMessage({
-        id: nanoid(),
-        chatID: currentChatID,
-        sender: "ai",
-        text: "This is a simulated Gemini reply!",
-        timestamp: Date.now(),
-      });
-      setOptimisticResponse(null);
-      setMsgLoader(false);
-    }, 1500);
-  }, [isLoggedIn, userPrompt, chat, addMessage, addChatroom, router]);
+    if (inputImg) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        send(e.target?.result as string);
+      };
+      reader.readAsDataURL(inputImg);
+    } else {
+      send();
+    }
+  }, [
+    isLoggedIn,
+    userPrompt,
+    chat,
+    addMessage,
+    addChatroom,
+    router,
+    phone,
+    inputImg,
+    userPrompt,
+    cancelRef,
+  ]);
 
   const handleTextareaChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

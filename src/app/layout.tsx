@@ -59,7 +59,9 @@ export default function RootLayout({
       <body
         className={`${OutfitFont.className} dark:bg-[#131314] h-dvh w-full overflow-hidden bg-white text-black dark:text-white`}
       >
-        <ThemeProviders>{children}</ThemeProviders>
+        <ThemeProviders>
+          <div className="h-full w-full">{children}</div>
+        </ThemeProviders>
 
         <Toaster />
       </body>

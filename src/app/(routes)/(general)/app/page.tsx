@@ -1,16 +1,23 @@
 "use client";
 
-import HomeCards from "@/components/temp-components/home-cards";
 import { useAuthStore } from "@/utils/auth-store";
 import { useRouter } from "next/navigation";
 import router from "next/router";
 import React, { useEffect } from "react";
+import { getCurrentUserPhone, seedDummyChatData } from "@/utils/chat-store";
 
-const page = async () => {
+const Page = () => {
   // const session = await auth();
 
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
   const router = useRouter();
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      const phone = getCurrentUserPhone();
+      if (phone) seedDummyChatData(phone);
+    }
+  }, [isLoggedIn]);
 
   // useEffect(() => {
   //   if (!isLoggedIn) {
@@ -28,9 +35,8 @@ const page = async () => {
       <h3 className="md:text-5xl text-4xl text-wrap text-accentGray/50">
         {isLoggedIn ? "How can I help you today?" : "Sign in to get started"}
       </h3>
-      <HomeCards />
     </section>
   );
 };
 
-export default page;
+export default Page;

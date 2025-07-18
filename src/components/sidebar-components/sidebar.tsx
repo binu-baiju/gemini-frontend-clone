@@ -22,17 +22,19 @@ import GeminiLogo from "../header-components/gemini-logo";
 import { SiGooglegemini } from "react-icons/si";
 import { LuGalleryHorizontalEnd } from "react-icons/lu";
 import { FaGithub } from "react-icons/fa";
-import { useChatStore } from "@/utils/chat-store";
+import { getUserChatStore, getCurrentUserPhone } from "@/utils/chat-store";
 import { useDebouncedValue } from "../dev-components/useDebouncedValue";
 import SidebarSearchBar from "./sidebar-search-bar";
 
-const SideBar = ({ user, sidebarList }: { user?: User; sidebarList: any }) => {
+const SideBar = () => {
   const [open, setOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const { chat } = useParams();
 
-  const chatrooms = useChatStore((s) => s.chatrooms);
+  const phone = getCurrentUserPhone();
+  const userChatStore = phone ? getUserChatStore(phone) : null;
+  const chatrooms = userChatStore ? userChatStore((s) => s.chatrooms) : [];
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
   const filteredChatrooms = debouncedSearch

@@ -5,7 +5,7 @@ import clsx from "clsx";
 import Link from "next/link";
 import { MdOutlineChatBubbleOutline, MdDeleteOutline } from "react-icons/md";
 import { useParams } from "next/navigation";
-import { useChatStore } from "@/utils/chat-store";
+import { getUserChatStore, getCurrentUserPhone } from "@/utils/chat-store";
 import { toast } from "sonner";
 import { Chatroom } from "@/utils/chat-store";
 
@@ -16,7 +16,11 @@ type SidebarChatListProps = {
 const SidebarChatList = ({ chatrooms }: SidebarChatListProps) => {
   const { chat } = useParams();
   const [hovered, setHovered] = useState<string | null>(null);
-  const deleteChatroom = useChatStore((s) => s.deleteChatroom);
+  const phone = getCurrentUserPhone();
+  const userChatStore = phone ? getUserChatStore(phone) : null;
+  const deleteChatroom = userChatStore
+    ? userChatStore((s) => s.deleteChatroom)
+    : () => {};
 
   const handleDelete = (id: string) => {
     deleteChatroom(id);
