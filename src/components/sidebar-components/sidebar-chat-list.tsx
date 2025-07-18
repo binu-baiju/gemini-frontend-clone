@@ -8,6 +8,8 @@ import { useParams } from "next/navigation";
 import { getUserChatStore, getCurrentUserPhone } from "@/utils/chat-store";
 import { toast } from "sonner";
 import { Chatroom } from "@/utils/chat-store";
+import type { UseBoundStore, StoreApi } from "zustand";
+import type { ChatState } from "@/utils/chat-store";
 
 type SidebarChatListProps = {
   chatrooms: Chatroom[];
@@ -17,7 +19,9 @@ const SidebarChatList = ({ chatrooms }: SidebarChatListProps) => {
   const { chat } = useParams();
   const [hovered, setHovered] = useState<string | null>(null);
   const phone = getCurrentUserPhone();
-  const userChatStore = phone ? getUserChatStore(phone) : null;
+  const userChatStore = phone
+    ? (getUserChatStore(phone) as UseBoundStore<StoreApi<ChatState>>)
+    : null;
   const deleteChatroom = userChatStore
     ? userChatStore((s) => s.deleteChatroom)
     : () => {};
@@ -29,7 +33,7 @@ const SidebarChatList = ({ chatrooms }: SidebarChatListProps) => {
 
   return (
     <ul className="mt-2 space-y-1 ">
-      {chatrooms.map((room) => (
+      {chatrooms.map((room: Chatroom) => (
         <li key={room.id} className="relative group">
           <DevButton
             rounded="full"

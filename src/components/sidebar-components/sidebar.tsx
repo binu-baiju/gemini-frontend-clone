@@ -25,6 +25,8 @@ import { FaGithub } from "react-icons/fa";
 import { getUserChatStore, getCurrentUserPhone } from "@/utils/chat-store";
 import { useDebouncedValue } from "../dev-components/useDebouncedValue";
 import SidebarSearchBar from "./sidebar-search-bar";
+import type { UseBoundStore, StoreApi } from "zustand";
+import type { ChatState, Chatroom } from "@/utils/chat-store";
 
 const SideBar = () => {
   const [open, setOpen] = useState(false);
@@ -33,12 +35,16 @@ const SideBar = () => {
   const { chat } = useParams();
 
   const phone = getCurrentUserPhone();
-  const userChatStore = phone ? getUserChatStore(phone) : null;
-  const chatrooms = userChatStore ? userChatStore((s) => s.chatrooms) : [];
+  const userChatStore = phone
+    ? (getUserChatStore(phone) as UseBoundStore<StoreApi<ChatState>>)
+    : null;
+  const chatrooms: Chatroom[] = userChatStore
+    ? userChatStore((s) => s.chatrooms)
+    : [];
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
   const filteredChatrooms = debouncedSearch
-    ? chatrooms.filter((room) =>
+    ? chatrooms.filter((room: Chatroom) =>
         room.title.toLowerCase().includes(debouncedSearch.toLowerCase())
       )
     : chatrooms;

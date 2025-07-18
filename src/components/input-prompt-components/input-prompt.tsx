@@ -8,7 +8,12 @@ import Link from "next/link";
 import { MdImageSearch } from "react-icons/md";
 import { IoMdClose } from "react-icons/io";
 import { useAuthStore } from "@/utils/auth-store";
-import { getUserChatStore, getCurrentUserPhone } from "@/utils/chat-store";
+import {
+  getUserChatStore,
+  getCurrentUserPhone,
+  ChatState,
+} from "@/utils/chat-store";
+import type { UseBoundStore, StoreApi } from "zustand";
 
 const InputPrompt = () => {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
@@ -16,7 +21,9 @@ const InputPrompt = () => {
   const router = useRouter();
   const { chat } = useParams();
   const phone = getCurrentUserPhone();
-  const userChatStore = phone ? getUserChatStore(phone) : null;
+  const userChatStore = phone
+    ? (getUserChatStore(phone) as UseBoundStore<StoreApi<ChatState>>)
+    : null;
   const addMessage = userChatStore
     ? userChatStore((s) => s.addMessage)
     : () => {};
