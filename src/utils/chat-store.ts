@@ -17,7 +17,7 @@ export type ChatMessage = {
   image?: string; // data URL if present
 };
 
-type ChatState = {
+export type ChatState = {
   chatrooms: Chatroom[];
   messages: ChatMessage[];
   addChatroom: (title: string, id: string) => void;

@@ -4,11 +4,13 @@ import {
   getUserChatStore,
   getCurrentUserPhone,
   ChatMessage,
+  ChatState,
 } from "@/utils/chat-store";
 import { useParams } from "next/navigation";
 import { SiGooglegemini } from "react-icons/si";
 import { MdContentCopy } from "react-icons/md";
 import { toast } from "sonner";
+import type { UseBoundStore, StoreApi } from "zustand";
 
 const CopyButton = ({ text }: { text: string }) => (
   <button
@@ -27,9 +29,11 @@ const OptimisticChat = () => {
   const { chat } = useParams();
   const chatID = chat as string;
   const phone = getCurrentUserPhone();
-  const userChatStore = phone ? getUserChatStore(phone) : null;
+  const userChatStore = phone
+    ? (getUserChatStore(phone) as UseBoundStore<StoreApi<ChatState>>)
+    : null;
   const messages: ChatMessage[] = userChatStore
-    ? (userChatStore((s) => s.messages) as ChatMessage[]).filter(
+    ? userChatStore((s) => s.messages).filter(
         (m: ChatMessage) => m.chatID === chatID
       )
     : [];
