@@ -17,7 +17,10 @@ export default function SignInNow({
         <span className="font-medium">{userData.phone}</span>
         <button
           className="px-3 py-1 rounded bg-red-500 text-white hover:bg-red-600 transition"
-          onClick={logout}
+          onClick={() => {
+            logout();
+            router.push("/app");
+          }}
         >
           Logout
         </button>
