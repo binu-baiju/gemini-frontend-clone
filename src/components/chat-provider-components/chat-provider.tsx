@@ -13,15 +13,15 @@ import { lowlight } from "lowlight";
 import { Markdown as TipTapMkd } from "tiptap-markdown";
 import { FormatOutput } from "@/utils/shadow";
 import root from "react-shadow/styled-components";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-import geminiZustand from "@/utils/gemini-zustand";
 import { FaWandMagicSparkles } from "react-icons/fa6";
 import { createPortal } from "react-dom";
-import { updateResponse } from "@/actions/actions";
 import DevButton from "../dev-components/dev-button";
-import { MdImageSearch, MdOutlineImage, MdOutlineModeEditOutline } from "react-icons/md";
+import {
+  MdImageSearch,
+  MdOutlineImage,
+  MdOutlineModeEditOutline,
+} from "react-icons/md";
 import { SiGooglegemini } from "react-icons/si";
-
 import Image from "next/image";
 import ReactTooltip from "../dev-components/react-tooltip";
 import TextToSpeech from "./text-to-speech";
@@ -60,7 +60,6 @@ const ChatProvider: React.FC<{
   imgName?: string;
   imgInfo: { imgSrc: string; imgAlt: string };
 }> = ({ llmResponse, chatUniqueId, userPrompt, imgInfo, imgName }) => {
-  const { topLoader, setCurrChat, setTopLoader, currChat,geminiApiKey } = geminiZustand();
   const [dropdown, setDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ top: 0, left: 0 });
   const [initialResponse, setInitialResponse] = useState(llmResponse);
@@ -70,10 +69,7 @@ const ChatProvider: React.FC<{
   const inputRef = useRef<HTMLInputElement>(null);
   const [initialPrompt, setInitialPrompt] = useState(userPrompt);
   const [promptModify, setPromptModify] = useState(false);
-
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const genAI = new GoogleGenerativeAI(geminiApiKey as string);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   const editor = useEditor({
     extensions,
@@ -90,52 +86,12 @@ const ChatProvider: React.FC<{
     setSelectedNode(selectedNode);
   };
 
+  // Remove server-side prompt modification logic
   const handlePrompt = async (
     promptType: keyof typeof PROMPT_TYPES | "Custom"
   ) => {
-    let prompt;
-    if (promptType === "Custom") {
-      prompt = `This is the whole response: ${initialResponse}. ${inputRef.current?.value} Specifically focus on this part: "${selectedNode}". Ensure the modified part aligns seamlessly with the rest of the response. Provide the entire modified response back, preserving the essential introductory and concluding phrases without adding any new non-contextual information.`;
-    } else {
-      const promptInstructions = {
-        Longer: "Lengthen",
-        Shorter: "Shorten",
-        Regenerate: "Regenerate",
-        Remove: "Remove",
-        Simplify: "Simplify the language of",
-        Elaborate: "Elaborate on",
-        Formalize: "Rewrite in a more formal tone",
-        Casual: "Rewrite in a more casual tone",
-        Persuasive: "Rewrite to be more persuasive",
-        Technical: "Add more technical details to",
-        Metaphor: "Incorporate a relevant metaphor into",
-        Examples: "Add relevant examples to",
-        Counterargument: "Present a counterargument to",
-        Summary: "Provide a concise summary of",
-      };
-      prompt = `This is the whole response: ${initialResponse}. ${promptInstructions[promptType]} a specific part of the response, specifically "${selectedNode}". Ensure it aligns seamlessly with the rest of the response. Provide the entire modified response back, preserving the essential introductory and concluding phrases without adding any new non-contextual information.`;
-    }
-
-    try {
-      setUpdateLoader(true);
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      if (!text) throw new Error("Error while generating prompt");
-      const updatedContent = await updateResponse({
-        chatUniqueId,
-        updatedResponse: text,
-      });
-      setInitialResponse(updatedContent.message.message.llmResponse as string);
-      editor?.commands.setContent(
-        updatedContent.message.message.llmResponse as string
-      );
-      setDropdown(false);
-    } catch (error) {
-      console.error("Error generating response:", error);
-    } finally {
-      setUpdateLoader(false);
-    }
+    // No-op for now, or you can implement client-side prompt modification if desired
+    setDropdown(false);
   };
 
   useEffect(() => {
@@ -152,8 +108,6 @@ const ChatProvider: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
-
   const handleButtonClick = () => {
     handleSelectNode();
     if (buttonRef.current) {
@@ -167,8 +121,9 @@ const ChatProvider: React.FC<{
   };
   const DropdownContent = () => (
     <div
-      className={`${updateLoader && "dropdown-loader pointer-events-none "
-        } p-[3px] bg-rtlLight dark:bg-rtlDark rounded-xl shadow-md absolute z-50`}
+      className={`${
+        updateLoader && "dropdown-loader pointer-events-none "
+      } p-[3px] bg-rtlLight dark:bg-rtlDark rounded-xl shadow-md absolute z-50`}
       style={{
         top: `${dropdownPosition.top}px`,
         left: `${dropdownPosition.left}px`,
@@ -201,15 +156,12 @@ const ChatProvider: React.FC<{
   );
 
   const handleToSetPrompt = () => {
-    if (initialPrompt) {
-      setCurrChat("userPrompt", initialPrompt);
-      setPromptModify(false);
-      setInitialPrompt(userPrompt);
-    }
+    setPromptModify(false);
+    setInitialPrompt(userPrompt);
   };
   const handleTxtToSpeech = () => {
-    return editor?.getText() as string
-  }
+    return editor?.getText() as string;
+  };
   return (
     <>
       <div className="w-full h-fit flex items-start gap-3 group relative">
@@ -221,10 +173,11 @@ const ChatProvider: React.FC<{
           className="rounded-full cursor-pointer"
         />
         <textarea
-          className={`prompt-area pt-1 text-base border-2 resize-none rounded-md bg-transparent outline-none ${promptModify
-            ? " max-h-none w-full !p-3 focus:border-accentBlue/70  border-accentGray "
-            : " max-h-40 border-transparent"
-            } px-1 w-fit `}
+          className={`prompt-area pt-1 text-base border-2 resize-none rounded-md bg-transparent outline-none ${
+            promptModify
+              ? " max-h-none w-full !p-3 focus:border-accentBlue/70  border-accentGray "
+              : " max-h-40 border-transparent"
+          } px-1 w-fit `}
           readOnly={!promptModify}
           onChange={(e) => setInitialPrompt(e.target.value)}
           value={initialPrompt}
@@ -244,12 +197,10 @@ const ChatProvider: React.FC<{
       </div>
       {promptModify && (
         <div className="flex item-center gap-2 p-10 pt-2">
-          {" "}
           <DevButton
             onClick={() => {
               setInitialPrompt(userPrompt);
               setPromptModify(false);
-              setCurrChat("userPrompt", null);
             }}
             rounded="full"
             variant="v3"
@@ -261,24 +212,25 @@ const ChatProvider: React.FC<{
             onClick={handleToSetPrompt}
             disabled={userPrompt === initialPrompt}
             rounded="full"
-            className={`text-accentBlue !bg-accentBlue/30 px-4 ${userPrompt === initialPrompt && " opacity-60 "
-              }`}
+            className={`text-accentBlue !bg-accentBlue/30 px-4 ${
+              userPrompt === initialPrompt && " opacity-60 "
+            }`}
           >
             Update
           </DevButton>
         </div>
       )}
-       {imgName &&
+      {imgName && (
         <div className="w-full mt-3 overflow-hidden ">
           <div className="p-4 w-fit max-w-full bg-rtlLight dark:bg-rtlDark rounded-md flex items-start gap-2">
             <MdOutlineImage className="text-4xl" />
-            <p className="text-lg truncate"> {imgName}</p></div>
+            <p className="text-lg truncate"> {imgName}</p>
+          </div>
         </div>
-      }
+      )}
       <div className="w-full flex justify-end h-16 items-center">
         <TextToSpeech handleTxtToSpeech={handleTxtToSpeech} />
       </div>
-     
       <div className="flex md:flex-row flex-col w-full items-start gap-4">
         <SiGooglegemini className="text-4xl text-[#4E82EE] transition-all duration-500" />
         <root.div className="w-full shadowDiv -translate-y-4">
@@ -297,7 +249,7 @@ const ChatProvider: React.FC<{
                     aspectRatio: "1/1",
                     cursor: "pointer",
                     height: "2.5rem",
-                    backgroundColor: "#334155"
+                    backgroundColor: "#334155",
                   }}
                 >
                   <FaWandMagicSparkles />
@@ -308,14 +260,12 @@ const ChatProvider: React.FC<{
           </FormatOutput>
         </root.div>
       </div>
-
       <ChatActionsBtns
         chatID={chatUniqueId}
         userPrompt={userPrompt}
         llmResponse={llmResponse}
         shareMsg={`user prompt: ${userPrompt} \n\n llm response:${handleTxtToSpeech()}`}
       />
-
       {dropdown && createPortal(<DropdownContent />, document.body)}
     </>
   );

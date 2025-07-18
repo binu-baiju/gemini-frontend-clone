@@ -1,5 +1,4 @@
 import React from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/utils/auth-store";
 
 export default function SignInNow({
@@ -7,7 +6,6 @@ export default function SignInNow({
 }: {
   userData?: { phone?: string };
 }) {
-  const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
 
   if (userData && userData.phone) {
@@ -24,12 +22,6 @@ export default function SignInNow({
     );
   }
 
-  return (
-    <button
-      className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 transition"
-      onClick={() => router.push("/auth")}
-    >
-      Sign In
-    </button>
-  );
+  // If not logged in, show nothing
+  return null;
 }

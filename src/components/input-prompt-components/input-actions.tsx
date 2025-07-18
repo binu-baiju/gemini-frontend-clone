@@ -2,8 +2,6 @@
 
 import React from "react";
 import DevButton from "../dev-components/dev-button";
-
-import geminiZustand from "@/utils/gemini-zustand";
 import { GoSquareFill } from "react-icons/go";
 import SpeechToText from "../chat-provider-components/speech-to-text";
 import { RiImageAddFill } from "react-icons/ri";
@@ -13,18 +11,19 @@ import ReactTooltip from "../dev-components/react-tooltip";
 const InputActions = ({
   generateMsg,
   handleCancel,
-  handleImageUpload
+  handleImageUpload,
+  userPrompt,
+  msgLoader,
 }: {
   generateMsg: () => void;
   handleCancel: () => void;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void
+  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  userPrompt: string;
+  msgLoader: boolean;
 }) => {
-  const { currChat, msgLoader } = geminiZustand();
   return (
-    <div
-      className={`flex justify-end items-center`}
-    >
-      {currChat.userPrompt && msgLoader ? (
+    <div className={`flex justify-end items-center`}>
+      {userPrompt && msgLoader ? (
         <ReactTooltip tipData="Stop response">
           <DevButton
             onClick={handleCancel}
@@ -35,11 +34,9 @@ const InputActions = ({
             <GoSquareFill className="text-xl text-black dark:text-white" />
           </DevButton>
         </ReactTooltip>
-
-      )
-        : (<>
+      ) : (
+        <>
           <ReactTooltip tipData="Upload image">
-
             <DevButton
               className="p-3 relative"
               rounded="full"
@@ -58,7 +55,6 @@ const InputActions = ({
           </ReactTooltip>
 
           <ReactTooltip tipData="Upload photo">
-
             <DevButton
               className="p-3 relative md:!hidden !flex"
               rounded="full"
@@ -80,17 +76,17 @@ const InputActions = ({
           <SpeechToText />
 
           <ReactTooltip tipData="Submit">
-
             <DevButton
               asIcon
               onClick={generateMsg}
               type="submit"
               rounded="full"
               variant="v3"
-              className={`overflow-hidden transform origin-right p-2 ${currChat.userPrompt && !msgLoader
-                ? "*:w-8 *:scale-100 pointer-events-auto  ml-2"
-                : "*:w-0 *:scale-0 pointer-events-none"
-                }`}
+              className={`overflow-hidden transform origin-right p-2 ${
+                userPrompt && !msgLoader
+                  ? "*:w-8 *:scale-100 pointer-events-auto  ml-2"
+                  : "*:w-0 *:scale-0 pointer-events-none"
+              }`}
             >
               <svg
                 className="overflow-hidden transition-all transform"
@@ -104,9 +100,8 @@ const InputActions = ({
               </svg>
             </DevButton>
           </ReactTooltip>
-
-        </>)}
-
+        </>
+      )}
     </div>
   );
 };

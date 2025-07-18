@@ -22,12 +22,24 @@ import GeminiLogo from "../header-components/gemini-logo";
 import { SiGooglegemini } from "react-icons/si";
 import { LuGalleryHorizontalEnd } from "react-icons/lu";
 import { FaGithub } from "react-icons/fa";
+import { useChatStore } from "@/utils/chat-store";
+import { useDebouncedValue } from "../dev-components/useDebouncedValue";
+import SidebarSearchBar from "./sidebar-search-bar";
 
 const SideBar = ({ user, sidebarList }: { user?: User; sidebarList: any }) => {
   const [open, setOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const router = useRouter();
   const { chat } = useParams();
+
+  const chatrooms = useChatStore((s) => s.chatrooms);
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const filteredChatrooms = debouncedSearch
+    ? chatrooms.filter((room) =>
+        room.title.toLowerCase().includes(debouncedSearch.toLowerCase())
+      )
+    : chatrooms;
 
   useEffect(() => {
     setIsClient(true);
@@ -86,13 +98,18 @@ const SideBar = ({ user, sidebarList }: { user?: User; sidebarList: any }) => {
           </DevButton>
         </ReactTooltip>
         {open && (
-          <h2 className="pl-3 mt-10">
-            {sidebarList.success && sidebarList.message.length > 0 && "Recent"}
+          <div className="px-3 mt-6">
+            <SidebarSearchBar search={search} setSearch={setSearch} />
+          </div>
+        )}
+        {open && (
+          <h2 className="pl-3 mt-6">
+            {filteredChatrooms.length > 0 && "Recent"}
           </h2>
         )}
       </div>
       <div className={`${open ? "block" : "hidden"} flex-grow overflow-y-auto`}>
-        <SidebarChatList sidebarList={sidebarList} />
+        <SidebarChatList chatrooms={filteredChatrooms} />
       </div>
       <div>
         <ul className="mt-5 space-y-1">
