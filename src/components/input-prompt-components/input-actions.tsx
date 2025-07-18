@@ -3,7 +3,6 @@
 import React from "react";
 import DevButton from "../dev-components/dev-button";
 import { GoSquareFill } from "react-icons/go";
-import SpeechToText from "../chat-provider-components/speech-to-text";
 import { RiImageAddFill } from "react-icons/ri";
 import { SlCamera } from "react-icons/sl";
 import ReactTooltip from "../dev-components/react-tooltip";
@@ -72,8 +71,6 @@ const InputActions = ({
               <SlCamera className="text-2xl text-black dark:text-white" />
             </DevButton>
           </ReactTooltip>
-
-          <SpeechToText />
 
           <ReactTooltip tipData="Submit">
             <DevButton

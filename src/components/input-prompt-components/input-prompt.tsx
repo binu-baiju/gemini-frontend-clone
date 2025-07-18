@@ -12,6 +12,7 @@ import {
   getUserChatStore,
   getCurrentUserPhone,
   ChatState,
+  Chatroom,
 } from "@/utils/chat-store";
 import type { UseBoundStore, StoreApi } from "zustand";
 
@@ -30,7 +31,9 @@ const InputPrompt = () => {
   const addChatroom = userChatStore
     ? userChatStore((s) => s.addChatroom)
     : () => {};
-  const chatrooms = userChatStore ? userChatStore((s) => s.chatrooms) : [];
+  const chatrooms: Chatroom[] = userChatStore
+    ? userChatStore((s) => s.chatrooms)
+    : [];
   const [inputImg, setInputImg] = useState<File | null>(null);
   const [inputImgName, setInputImgName] = useState<string | null>(null);
   const [userPrompt, setUserPrompt] = useState("");
@@ -43,7 +46,7 @@ const InputPrompt = () => {
   const cancelRef = useRef(false);
 
   const handleSend = useCallback(() => {
-    if (!isLoggedIn || !phone) {
+    if (!isLoggedIn || !phone || !userChatStore) {
       router.push("/auth");
       return;
     }
@@ -135,6 +138,7 @@ const InputPrompt = () => {
     inputImg,
     userPrompt,
     cancelRef,
+    userChatStore,
   ]);
 
   const handleTextareaChange = useCallback(

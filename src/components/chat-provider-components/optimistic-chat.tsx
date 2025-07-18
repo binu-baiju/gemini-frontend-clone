@@ -86,7 +86,8 @@ const OptimisticChat = () => {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col gap-4 px-2 overflow-y-auto h-full flex-1 justify-end"
+      className="flex flex-col gap-4 px-2 overflow-y-auto"
+      style={{ height: "500px" }}
       onScroll={handleScroll}
     >
       {pagedMessages.map((msg: ChatMessage, idx: number) => (

@@ -9,7 +9,10 @@ import { toast } from "sonner";
 
 const schema = z.object({
   countryCode: z.string().min(1, "Select a country code"),
-  phone: z.string().min(8, "Enter a valid phone number"),
+  phone: z
+    .string()
+    .length(9, "Phone number must be exactly 9 digits")
+    .regex(/^\d+$/, "Phone number must contain only digits"),
 });
 
 export default function PhoneForm({
@@ -27,6 +30,7 @@ export default function PhoneForm({
   } = useForm({
     resolver: zodResolver(schema),
     defaultValues: { countryCode: "", phone: "" },
+    mode: "onChange", // Show errors as you type
   });
 
   const onSubmit = (data: any) => {
@@ -52,7 +56,7 @@ export default function PhoneForm({
       <input
         {...register("phone")}
         placeholder="Phone number"
-        className="input input-bordered w-full"
+        className="w-full px-3 py-2 rounded-lg border border-blue-500 bg-blue-500 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
         type="tel"
       />
       {errors.phone && (

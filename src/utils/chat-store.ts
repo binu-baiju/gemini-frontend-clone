@@ -78,7 +78,7 @@ export function seedDummyChatData(phone: string) {
   if (chatrooms.length > 0) return; // Already seeded
   const chatID = nanoid();
   state.addChatroom("Welcome to Gemini!", chatID);
-  for (let i = 1; i <= 30; i++) {
+  for (let i = 1; i <= 200; i++) {
     state.addMessage({
       id: nanoid(),
       chatID,

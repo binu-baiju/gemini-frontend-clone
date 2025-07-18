@@ -100,7 +100,7 @@ const SideBar = () => {
             rounded="full"
             asIcon={open ? false : true}
             variant="v1"
-            className=" mt-5 text-sm gap-3 px-[13px] justify-between md:!flex !hidden"
+            className=" mt-5 text-sm gap-3 px-[13px] justify-between md:!flex !hidden w-full "
           >
             <IoMdAdd className="text-xl" /> {open && "New chat"}
           </DevButton>
@@ -121,37 +121,8 @@ const SideBar = () => {
       </div>
       <div>
         <ul className="mt-5 space-y-1">
-          <li>
-            <ReactTooltip occupy={false} place="right" tipData="Github">
-              <DevButton
-                variant="v3"
-                href="https://github.com/binu-baiju/gemini-frontend-clone"
-                target="_blank"
-                className={`text-sm *:text-xl ${
-                  open ? " aspect-auto " : " aspect-square "
-                } group !w-full !justify-start gap-3`}
-                rounded="full"
-              >
-                <FaGithub />
-                {open && "Github"}
-              </DevButton>
-            </ReactTooltip>
-          </li>
-          <li>
-            {" "}
-            <ReactTooltip occupy={false} place="right" tipData="Help">
-              <DevButton
-                variant="v3"
-                className={`text-sm *:text-xl ${
-                  open ? " aspect-auto " : " aspect-square "
-                } group !w-full !justify-start gap-3`}
-                rounded="full"
-              >
-                <IoMdHelpCircleOutline />
-                {open && "Help"}
-              </DevButton>
-            </ReactTooltip>
-          </li>
+          <li></li>
+          <li> </li>
           <li>
             <ReactTooltip
               occupy={false}
@@ -164,10 +135,8 @@ const SideBar = () => {
                   open ? " aspect-auto " : " aspect-square "
                 } group !w-full !justify-start gap-3`}
                 rounded="full"
-              >
-                <RxCounterClockwiseClock />
-                {open && "Activity"}
-              </DevButton>
+                children={undefined}
+              ></DevButton>
             </ReactTooltip>
           </li>
           <li>

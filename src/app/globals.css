@@ -252,28 +252,6 @@ textarea {
   }
 }
 
-/* microphone blink animation  */
-.animate-pulse-border {
-  animation: pulse-border 2s infinite;
-}
-
-@keyframes pulse-border {
-  0% {
-    border-color: transparent;
-  }
-  50% {
-    border-color: rgba(
-      59,
-      130,
-      246,
-      0.5
-    ); /* tailwind blue-500 at 50% opacity */
-  }
-  100% {
-    border-color: transparent;
-  }
-}
-
 /* ---break---  */
 
 @layer base {
